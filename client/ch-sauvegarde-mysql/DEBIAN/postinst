@@ -1,0 +1,32 @@
+#!/bin/bash
+
+USER_SAVE=$(whiptail --inputbox "Veuillez saisir l'utilisateur permettant de se connecter a mysql.\nIl lui faut les droits SELECT et LOCK TABLES." 10 50 save 3>&1 1>&2 2>&3)
+
+PASSWORD_SAVE=$(whiptail --passwordbox "Veuillez saisir le mot de passe permettant de se connecter a mysql." 10 50 3>&1 1>&2 2>&3)
+
+DEST=$(whiptail --inputbox "Veuillez saisir le repertoire de destination." 10 50 /home/sauvegarde 3>&1 1>&2 2>&3)
+
+# Recupère la liste des bases de données. La première ligne contient "Databases"
+mysql -u $USER_SAVE -p"$PASSWORD_SAVE" --execute="SHOW DATABASES;" | cut -d "+" -f 2 > postinst.tmp
+
+# On nettoie pour enlever Databases et information_globale
+sed -i "1,2d" postinst.tmp
+# On formate pour whiptail
+sed -i "s/$/ \"\" off/g" postinst.tmp
+
+CHOICE=$(whiptail --checklist "selection les bases de donnees" 25 30 5 $(cat postinst.tmp) 3>&1 1>&2 2>&3)
+
+[ -d $DEST ] && mkdir -p $DEST
+
+echo "#!/bin/bash" > $DEST/save_mysql.sh
+
+for i in $CHOICE
+do
+        echo "mysqldump -u $USER_SAVE -p$PASSWORD_SAVE $i > $DEST/$i.sql" | tr -d \" >> $DEST/save_mysql.sh
+done
+
+rm postinst.tmp
+
+# Ajout de la tache cron
+whiptail --msgbox "Une tache crontab vient d'être ajouté pour tous les jours à 1h." 10 30
+(crontab -l ; echo "0 1 * * * $DEST/save_mysql.sh") | crontab -

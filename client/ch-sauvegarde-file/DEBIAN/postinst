@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# Initialisation - Question utilisateur
+SAVE=$(whiptail --inputbox "Veuillez saisir les repertoires à sauvegarder (séparé par des virguels)." 10 50 /home 3>&1 1>&2 2>&3)
+HOST_DEST=$(whiptail --inputbox "Veuillez saisir le serveur de destination." 10 50  3>&1 1>&2 2>&3)
+DEST_COMPLETE=$(whiptail --inputbox "Veuillez saisir le repertoire de destination pour les sauvegardes completes." 10 50 /home/save/$(hostname)/complete- 3>&1 1>&2 2>&3)
+DEST_DIFF=$(whiptail --inputbox "Veuillez saisir le repertoire de destination pour les sauvegardes differentielles." 10 50 /home/save/$(hostname)/differentielle- 3>&1 1>&2 2>&3)
+PRIVATE_KEY=$(whiptail --inputbox "Veuillez saisir l'emplacement et le nom de destination de la clé publique." 10 50 /home/save/.ssh/save 3>&1 1>&2 2>&3)
+ACCOUNT=$(whiptail --inputbox "Veuillez saisir le compte à utiliser." 10 50 save 3>&1 1>&2 2>&3)
+SCRIPT_DEST=/usr/sbin
+
+# Generation et communication a l'utilisateur de la clé SSH
+[ -e $(dirname $PRIVATE_KEY) ] || mkdir -p $(dirname $PRIVATE_KEY)
+
+ssh-keygen -N "" -f $PRIVATE_KEY
+
+whiptail --msgbox "Vous devez maintenant copier la clé publique ($PRIVATE_KEY.pub) dans le fichier .ssh/authorized_keys du serveur." 10 50
+
+cat $PRIVATE_KEY.pub
+
+echo $SAVE > postinst.tmp
+
+# Transformation des chemins saisies en ligne, qui seront interprétés par le for plus bas
+sed -i "s/,/\n/g" postinst.tmp
+
+SAVE=$(cat postinst.tmp)
+
+# Creation et initialisations des scripts de sauvegarde complete et differentielle
+echo -e "#!/bin/bash \n" > $SCRIPT_DEST/save_complete.sh
+echo "NAGIOS_SERVICE=complete" >> $SCRIPT_DEST/save_complete.sh
+echo "NAGIOS_SERVER=127.0.0.1 " >> $SCRIPT_DEST/save_complete.sh
+echo "PRIVATE_KEY=$PRIVATE_KEY" >> $SCRIPT_DEST/save_complete.sh
+echo "HOST_DEST=$HOST_DEST" >> $SCRIPT_DEST/save_complete.sh
+echo "ACCOUNT=$ACCOUNT" >> $SCRIPT_DEST/save_complete.sh
+echo -e "DEST=$DEST_COMPLETE \n\n" >> $SCRIPT_DEST/save_complete.sh
+echo -e "[ -e /tmp/error_code.txt ] && rm /tmp/error_code.txt ; touch /tmp/error_code.txt \n" >> $SCRIPT_DEST/save_complete.sh
+
+echo -e "#!/bin/bash \n" > $SCRIPT_DEST/save_differentielle.sh
+echo "NAGIOS_SERVICE=differentielle" >> $SCRIPT_DEST/save_differentielle.sh
+echo "NAGIOS_SERVER=127.0.0.1 " >> $SCRIPT_DEST/save_differentielle.sh
+echo "PRIVATE_KEY=$PRIVATE_KEY" >> $SCRIPT_DEST/save_differentielle.sh
+echo "HOST_DEST=$HOST_DEST" >> $SCRIPT_DEST/save_differentielle.sh
+echo "ACCOUNT=$ACCOUNT" >> $SCRIPT_DEST/save_differentielle.sh
+echo "DEST=$DEST_DIFF" >> $SCRIPT_DEST/save_differentielle.sh
+echo -e "LAST_COMPLETE=\$(dirname \$DEST)/\$(ssh -i \$PRIVATE_KEY \$ACCOUNT@\$HOST_DEST ls -t \$(dirname \$DEST) | grep complete | cut -d \"\" -f 1 | tail -n 1) \n\n" >> $SCRIPT_DEST/save_differentielle.sh
+echo -e "[ -e /tmp/error_code.txt ] && rm /tmp/error_code.txt ; touch /tmp/error_code.txt \n" >> $SCRIPT_DEST/save_differentielle.sh
+
+# On lit les choix réalisés par l'utilisateur et pour chaque ligne on rajoute le rsync correspondant pour la sauvegarde complete et pour la differentielle
+for i in $SAVE
+do
+  echo -e "ssh -i \$PRIVATE_KEY \$ACCOUNT@\$HOST_DEST \"mkdir -p \$DEST\"" >> $SCRIPT_DEST/save_complete.sh
+	echo -e "rsync -avz --stats --rsh=\"ssh -i \$PRIVATE_KEY\" $i \$ACCOUNT@\$HOST_DEST:\$DEST>> /var/log/$i.log" >> $SCRIPT_DEST/save_complete.sh
+	echo -e "echo \$? . $i . complete >> /tmp/error_code.txt \n" >> $SCRIPT_DEST/save_complete.sh
+
+  echo -e "ssh -i \$PRIVATE_KEY \$ACCOUNT@\$HOST_DEST \"mkdir -p \$DEST\"" >> $SCRIPT_DEST/save_differentielle.sh
+	echo -e "rsync -avz --stats --link-dest=\$LAST_COMPLETE --rsh=\"ssh -i \$PRIVATE_KEY\" $i \$ACCOUNT@\$HOST_DEST:\$DEST >> /var/log/$i.log" >> $SCRIPT_DEST/save_differentielle.sh
+	echo -e "echo \$? . $i . diff >> /tmp/error_code.txt \n" >> $SCRIPT_DEST/save_differentielle.sh
+done
+
+echo -e "
+ERROR_CODE_COMPLETE=\$(cat /tmp/error_code.txt | grep -v 0 | grep complete ; echo \$?)
+
+# si le retour est egale à 1 alors c'est que le grep n'a rien renvoyé
+if [ \$ERROR_CODE_COMPLETE -eq 1 ] ; then
+	ssh -i \$PRIVATE_KEY \$ACCOUNT@\$HOST_DEST \"touch \$DEST/complete_ok\"
+fi" >> $SCRIPT_DEST/save_complete.sh
+
+echo -e "
+ERROR_CODE_DIFF=\$(cat /tmp/error_code.txt | grep -v 0 | grep diff ; echo \$?)
+
+# si le retour est egale à 1 alors c'est que le grep n'a rien renvoyé
+if [ \$ERROR_CODE_DIFF -eq 1 ] ; then
+	ssh -i \$PRIVATE_KEY \$ACCOUNT@\$HOST_DEST \"touch \$DEST/differentielle_ok\"
+fi" >> $SCRIPT_DEST/save_differentielle.sh
+
+rm postinst.tmp
+# Fin de création du script de sauvegarde complete
+
+# Ajout des tâches cron
+whiptail --msgbox "Une tache crontab vient d'être ajouté pour la sauvegarde complete\nUne fois par semaine (dimanche) à 1h." 10 50 
+(crontab -l ; echo "0 1 * * 0 $SCRIPT_DEST/save_complete.sh") | crontab -
+
+whiptail --msgbox "Une tache crontab vient d'être ajouté pour la sauvegarde différentielle\nUne fois par jour à 1h." 10 50
+(crontab -l ; echo "0 1 * * 1-6 $SCRIPT_DEST/save_differentielle.sh") | crontab -
+
+chmod +x  $SCRIPT_DEST/save_complete.sh  $SCRIPT_DEST/save_differentielle.sh
