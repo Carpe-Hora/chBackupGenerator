@@ -20,7 +20,7 @@ rm $SAVE_LOCATION/$EXCLUDE_FOLDER/error_code.txt ; touch $SAVE_LOCATION/$EXCLUDE
 for i in $HOSTS
 do
 	if [ $(ls $SAVE_LOCATION/$i | wc -l) -ne 0 ] ; then
-		cd $SAVE_LOCATION/$i/ && ls -1 | grep differentielle-$(date -d "1 day ago" +%F) | xargs -i tar -cvzf {}.tar.gz {} && [ -e $(ls -1t | head -1) ] && echo $? && chown $USER:$GROUP $(ls -1t | head -1)
+		cd $SAVE_LOCATION/$i/ && ls -1 | grep -e "[differentielle|complete]"-$(date -d "1 day ago" +%F) | xargs -i tar -cvzf {}.tar.gz {} && [ -e $(ls -1t | head -1) ] && echo $? && chown $USER:$GROUP $(ls -1t | head -1)
 		echo $? . $i >> $SAVE_LOCATION/$EXCLUDE_FOLDER/error_code.txt
 	fi
 done
