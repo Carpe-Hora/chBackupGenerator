@@ -61,7 +61,7 @@ echo -e "
 ERROR_CODE_COMPLETE=\$(cat /tmp/error_code.txt | grep -v 0 | grep complete ; echo \$?)
 
 # si le retour est egale à 1 alors c'est que le grep n'a rien renvoyé
-if [ \$ERROR_CODE_COMPLETE -eq 1 ] ; then
+if [ \$ERROR_CODE_COMPLETE -eq 1 ]; then
 	ssh -i \$PRIVATE_KEY \$ACCOUNT@\$HOST_DEST \"touch \$DEST/complete_ok\"
 fi" >> $SCRIPT_DEST/save_complete.sh
 
@@ -69,7 +69,7 @@ echo -e "
 ERROR_CODE_DIFF=\$(cat /tmp/error_code.txt | grep -v 0 | grep diff ; echo \$?)
 
 # si le retour est egale à 1 alors c'est que le grep n'a rien renvoyé
-if [ \$ERROR_CODE_DIFF -eq 1 ] ; then
+if [ \$ERROR_CODE_DIFF -eq 1 ]; then
 	ssh -i \$PRIVATE_KEY \$ACCOUNT@\$HOST_DEST \"touch \$DEST/differentielle_ok\"
 fi" >> $SCRIPT_DEST/save_differentielle.sh
 
