@@ -39,4 +39,5 @@ TODO List
 ----------
 
 * use config file to select the database/file to backup
+* use function in generate script
 * ...
