@@ -43,16 +43,16 @@ do
 			# si on est le jour de la sauvegarde complete
 
 			if [ $(date +%A) = $DAY_COMPLETE ]; then
-				echo "$i;;$NAGIOS_SERVICE_COMPLETE;;2;;CRITICAL - Complete ok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
+				echo "$i;;$NAGIOS_SERVICE_COMPLETE;;2;;CRITICAL - Complete nok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
 			else	
-				echo "$i;;$NAGIOS_SERVICE_DIFF;;2;;CRITICAL - Diff ok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
+				echo "$i;;$NAGIOS_SERVICE_DIFF;;2;;CRITICAL - Diff nok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
 			fi
 		fi
 	else
 		if [ $(date +%A) = $DAY_COMPLETE ]; then
-			echo "$i;;$NAGIOS_SERVICE_COMPLETE;;3;;UNKNOWN - Complete ok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
+			echo "$i;;$NAGIOS_SERVICE_COMPLETE;;3;;UNKNOWN - Complete unknown le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
 		else
-			echo "$i;;$NAGIOS_SERVICE_DIFF;;3;;UNKNOWN- Diff ok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'		
+			echo "$i;;$NAGIOS_SERVICE_DIFF;;3;;UNKNOWN- Diff unknown le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'		
 		fi
 	fi
 done
