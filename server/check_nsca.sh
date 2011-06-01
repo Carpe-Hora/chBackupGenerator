@@ -20,8 +20,8 @@ HOSTS=$(cat $SAVE_LOCATION/$EXCLUDE_FOLDER/list_hosts)
 for i in $HOSTS
 do
 	# On vérifie qu'il y a eu une sauvegarde aujourd'hui
-	DATE_LASTSAVE=$((ls $i | grep $(date +%F )) > /dev/null ; echo $?)
-	TYPE_LASTSAVE=$(ls $i | grep $(date +%F ) | cut -d'-' -f -1)
+	DATE_LASTSAVE=$((ls $SAVE_LOCATION/$i | grep $(date +%F )) > /dev/null ; echo $?)
+	TYPE_LASTSAVE=$(ls $SAVE_LOCATION/$i | grep $(date +%F ) | cut -d'-' -f -1)
  	# echo $i " date : " $DATE_LASTSAVE " type : " $TYPE_LASTSAVE
 
 	if [ $(ls $SAVE_LOCATION/$i | wc -l) -ne 0 ] ; then
