@@ -1,8 +1,0 @@
-Package: ch-sauvegarde-file
-Version: 1.1.8
-Section: admin
-Priority: optional
-Architecture: all
-Depends: whiptail, rsync
-Maintainer: Camille NERON <camille_neron@carpe-hora.com>
-Description: Install the file script backup
