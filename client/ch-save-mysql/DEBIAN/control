@@ -1,0 +1,8 @@
+Package: ch-sauvegarde-mysql
+Version: 1.1
+Section: admin
+Priority: optional
+Architecture: all
+Depends: whiptail, mysql-server-5.1, mysql-client-5.1
+Maintainer: Camille NERON <camille_neron@carpe-hora.com>
+Description: Install the MySQL script backup

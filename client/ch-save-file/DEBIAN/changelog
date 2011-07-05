@@ -1,0 +1,68 @@
+ch-sauvegarde-file (1.1.8) unstable; urgency=low
+
+  * missing escape to the modify of LAST_COMPLETE
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 15:47:43 +0200
+
+ch-sauvegarde-file (1.1.7) unstable; urgency=low
+
+  * bug : test if ERROR_CODE = 0 instead of 1, because if grep return nothing the error code is 1
+  * bug : touch correct_ok differentielle_ok doens't have the good path
+  * bug : LAST_COMPLETE doesn't return the good things (see the modification of DEST)
+  * bug : typo [ -e ], less space
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 15:29:32 +0200
+
+ch-sauvegarde-file (1.1.6) unstable; urgency=low
+
+  * fix typo
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 15:19:40 +0200
+
+ch-sauvegarde-file (1.1.5) unstable; urgency=low
+
+  * fix some bugs
+  * use /tmp and /var/log
+  * add directory existing test
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 15:04:36 +0200
+
+ch-sauvegarde-file (1.1.4) unstable; urgency=low
+
+  * bug : always problem with DEST
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 14:40:40 +0200
+
+ch-sauvegarde-file (1.1.3) unstable; urgency=low
+
+  * bug : DEST is keeping in final script
+  * bug : topo
+  * bug : escaping doesn't supported in whiptail command
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 14:34:53 +0200
+
+ch-sauvegarde-file (1.1.2) unstable; urgency=low
+
+  * bug : $DEST doesn't not exist, replaced by DEST_COMPLETE and DEST_DIFF
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 14:27:28 +0200
+
+ch-sauvegarde-file (1.1.1) unstable; urgency=low
+
+  * bug : topo
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 14:23:35 +0200
+
+ch-sauvegarde-file (1.1) unstable; urgency=low
+
+  * delete NSCA functionnality (go to server)
+  * create file if operation is terminate successfully
+
+ -- Camille <camille@ch-regent>  Tue, 17 May 2011 14:11:13 +0200
+
+ch-sauvegarde-file (1.0) unstable; urgency=low
+
+  * create paquet ch-sauvegarde-file
+
+ -- Camille Neron <camille_neron@carpe-hora.com>  Fri,  18 Feb 2011 10:32:04 +0100
+
