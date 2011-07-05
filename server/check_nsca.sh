@@ -22,10 +22,9 @@ do
 	# On vérifie qu'il y a eu une sauvegarde aujourd'hui
 	DATE_LASTSAVE=$((ls $SAVE_LOCATION/$i | grep $(date +%F )) > /dev/null ; echo $?)
 	TYPE_LASTSAVE=$(ls $SAVE_LOCATION/$i | grep $(date +%F ) | cut -d'-' -f -1)
- 	# echo $i " date : " $DATE_LASTSAVE " type : " $TYPE_LASTSAVE
+ 	#echo $i " date : " $DATE_LASTSAVE " type : " $TYPE_LASTSAVE
 
 	if [ $(ls $SAVE_LOCATION/$i | wc -l) -ne 0 ] ; then
-
 		# Si le grep de DATE_LASTSAVE à renvoyé quelque chose
 		if [ $DATE_LASTSAVE -eq 0 ] ; then
 			#ok
@@ -43,9 +42,9 @@ do
 			# si on est le jour de la sauvegarde complete
 
 			if [ $(date +%A) = $DAY_COMPLETE ]; then
-				echo "$i;;$NAGIOS_SERVICE_COMPLETE;;2;;CRITICAL - Complete nok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
+				echo "$i;;$NAGIOS_SERVICE_COMPLETE;;2;;CRITICAL - Complete critical le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
 			else	
-				echo "$i;;$NAGIOS_SERVICE_DIFF;;2;;CRITICAL - Diff nok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
+				echo "$i;;$NAGIOS_SERVICE_DIFF;;2;;CRITICAL - Diff critical le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
 			fi
 		fi
 	else

@@ -2,11 +2,11 @@
 
 SAVE_LOCATION=/home/sauvegarde
 EXCLUDE_FOLDER=save
-USER=save
-GROUP=save
+USER=sauvegarde
+GROUP=sauvegarde
 NAGIOS_SERVICE=Tarization
-NAGIOS_HOST=localhost
-NAGIOS_SERVER=127.0.0.1
+NAGIOS_HOST=$(hostname)
+NAGIOS_SERVER=212.51.173.8
 
 # Creation d'une liste d'hosts
 ls $SAVE_LOCATION | grep -v $EXCLUDE_FOLDER > $SAVE_LOCATION/$EXCLUDE_FOLDER/list_hosts
@@ -20,8 +20,11 @@ rm $SAVE_LOCATION/$EXCLUDE_FOLDER/error_code.txt ; touch $SAVE_LOCATION/$EXCLUDE
 for i in $HOSTS
 do
 	if [ $(ls $SAVE_LOCATION/$i | wc -l) -ne 0 ] ; then
-		cd $SAVE_LOCATION/$i/ && ls -1 | grep -e "[differentielle|complete]"-$(date -d "1 day ago" +%F) | xargs -i tar -cvzf {}.tar.gz {} && [ -e $(ls -1t | head -1) ] && echo $? && chown $USER:$GROUP $(ls -1t | head -1)
+		# cd $SAVE_LOCATION/$i/ && ls -1 | grep -e "[differentielle|complete]"-$(date -d "1 day ago" +%F) | xargs -i tar -cvzf {}.tar.gz {} && [ -e $(ls -1t | head -1) ] && echo $? && chown $USER:$GROUP $(ls -1t | head -1)
 		echo $? . $i >> $SAVE_LOCATION/$EXCLUDE_FOLDER/error_code.txt
+		
+		# Supprime sauvegarde d'il y a 8 jours	
+		cd $SAVE_LOCATION/$i && ls -1 | grep -e "[differentielle|complete]"-$(date -d "8 day ago" +%F) | xargs -i rm -rf {}
 	fi
 done
 
@@ -29,10 +32,10 @@ done
 ERROR_CODE=$(cat $SAVE_LOCATION/$EXCLUDE_FOLDER/error_code.txt | grep -v 0 ; echo $?)
 
 # Vérification de l'existance de NSCA puis envoie du message
-dpkg -l | grep nsca || echo "NSCA n\'est pas installé" 
+dpkg -l | grep nsca || echo "NSCA n\'est pas installé"
 
 # On prévient Nagios du résultat
-if [ $ERROR_CODE -eq 1 ] ; then
+if [ $ERROR_CODE -eq 1 ]; then
 	echo "$NAGIOS_HOST;;$NAGIOS_SERVICE;;0;;OK - Tarization ok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
 else
 	# Vérification de l'existance de NSCA puis envoie du message
