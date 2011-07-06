@@ -22,11 +22,14 @@ do
 	# On vérifie qu'il y a eu une sauvegarde aujourd'hui
 	DATE_LASTSAVE=$((ls $SAVE_LOCATION/$i | grep $(date +%F )) > /dev/null ; echo $?)
 	TYPE_LASTSAVE=$(ls $SAVE_LOCATION/$i | grep $(date +%F ) | cut -d'-' -f -1)
- 	#echo $i " date : " $DATE_LASTSAVE " type : " $TYPE_LASTSAVE
+	FILE_OK=$((ls $SAVE_LOCATION/$i/$TYPE_LASTSAVE-$(date +%F)/$TYPE_LASTSAVE_ok) > /dev/null ; echo $?) 
+ 	echo $i " date : " $DATE_LASTSAVE " type : " $TYPE_LASTSAVE
+	echo "Fichier existe : " $FILE_OK
 
 	if [ $(ls $SAVE_LOCATION/$i | wc -l) -ne 0 ] ; then
-		# Si le grep de DATE_LASTSAVE à renvoyé quelque chose
-		if [ $DATE_LASTSAVE -eq 0 ] ; then
+		# Si FILE_OK alors le fichier differentielle_ok ou complete_ok existe
+		# la sauvegarde s est terminée correctement
+		if [ $FILE_OK -eq 0 ] ; then
 			#ok
 			if [ $TYPE_LASTSAVE = "complete" ]; then
 				echo "$i;;$NAGIOS_SERVICE_COMPLETE;;0;;OK - Complete ok le $(date +%F)" | /usr/sbin/send_nsca -H $NAGIOS_SERVER -c /etc/send_nsca.cfg -d ';;'
@@ -36,7 +39,7 @@ do
 			fi
 		else
 			#nok
-			# si DATE_LASTSAVE n\' est pas égale à 0 c\'est qu\'il n\'a pas eu de sauvegarde
+			# si FILE_OK n\' est pas égale à 0 c\'est que la sauvegarde ne s\'est pas terminée
 			# le seul moyen pour savoir si c\'est une complete ou une differentielle c\'est le jour
 			# par exemple la complete est faite le dimanche (DAY_COMPLETE). date +%A renvoie le jour de la semaine en entier
 			# si on est le jour de la sauvegarde complete
