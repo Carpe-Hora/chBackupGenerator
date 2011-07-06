@@ -2,7 +2,7 @@
 
 SCRIPT_DEST=/usr/sbin
 
-if [ -e $SCRIPT_DEST/save_complete ] ; then
+if [ -e $SCRIPT_DEST/save_complete.sh ] ; then
 	echo "La sauvegarde est déja configuré." 
 	exit 0
 fi
@@ -84,9 +84,9 @@ rm postinst.tmp
 
 # Ajout des tâches cron
 whiptail --msgbox "Une tache crontab vient d'être ajouté pour la sauvegarde complete\nUne fois par semaine (dimanche) à 1h." 10 50 
-(crontab -l ; echo "0 1 * * 0 $SCRIPT_DEST/save_complete.sh") | crontab -
+crontab -l | grep "save_complete.sh" || (crontab -l ; echo "0 1 * * 0 $SCRIPT_DEST/save_complete.sh") | crontab -
 
 whiptail --msgbox "Une tache crontab vient d'être ajouté pour la sauvegarde différentielle\nUne fois par jour à 1h." 10 50
-(crontab -l ; echo "0 1 * * 1-6 $SCRIPT_DEST/save_differentielle.sh") | crontab -
+crontab -l | grep "save_complete.sh" || (crontab -l ; echo "0 1 * * 1-6 $SCRIPT_DEST/save_differentielle.sh") | crontab -
 
 chmod +x  $SCRIPT_DEST/save_complete.sh  $SCRIPT_DEST/save_differentielle.sh
