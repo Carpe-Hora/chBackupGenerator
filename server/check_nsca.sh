@@ -23,7 +23,12 @@ do
 	DATE_LASTSAVE=$((ls $SAVE_LOCATION/$i | grep $(date +%F )) > /dev/null ; echo $?)
 	TYPE_LASTSAVE=$(ls $SAVE_LOCATION/$i | grep $(date +%F ) | cut -d'-' -f -1)
 	FILE_OK=$((ls $SAVE_LOCATION/$i/$TYPE_LASTSAVE-$(date +%F)/$TYPE_LASTSAVE_ok) > /dev/null ; echo $?) 
- 	echo $i " date : " $DATE_LASTSAVE " type : " $TYPE_LASTSAVE
+
+	if [ $FILE_OK -eq 0 ] ; then
+		echo -e "\033[42m$i date : $DATE_LASTSAVE type : $TYPE_LASTSAVE\033[00m"
+	else
+		echo -e "\033[41m$i date : $DATE_LASTSAVE type : $TYPE_LASTSAVE\033[00m"
+	fi
 	echo "Fichier existe : " $FILE_OK
 
 	if [ $(ls $SAVE_LOCATION/$i | wc -l) -ne 0 ] ; then
